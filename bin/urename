@@ -91,8 +91,6 @@ def find(path):
 
 
 def include(filepath):
-    if is_binary(filepath):
-        return False
     if ".git/" in filepath:
         return False
     if ".swp" in filepath:
@@ -102,6 +100,8 @@ def include(filepath):
     if filepath.endswith(".class"):
         return False
     if os.path.basename(filepath) == "tags":
+        return False
+    if is_binary(filepath):
         return False
     return True
 
@@ -191,7 +191,7 @@ class GeneralPlugin(object):
         return True
 
     def tasks(self, src, dest):
-        all_files = find(".")
+        all_files = find(".") + [dest.path]
         src_base = os.path.splitext(os.path.basename(src.path))[0]
         dest_base = os.path.splitext(os.path.basename(dest.path))[0]
         return [
