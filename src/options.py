@@ -8,6 +8,6 @@ class Options(object):
         (options, args) = parser.parse_args()
         if len(args) == 2:
             self.src = File(args[0])
-            self.dest = File(args[0])
+            self.dest = File(args[1])
         else:
             parser.error("requires src and dest")

@@ -11,7 +11,7 @@ class Options(object):
         (options, args) = parser.parse_args()
         if len(args) == 2:
             self.src = File(args[0])
-            self.dest = File(args[0])
+            self.dest = File(args[1])
         else:
             parser.error("requires src and dest")
 class File(object):
@@ -50,7 +50,7 @@ class SubstituteTask(object):
         self.files = files
         self.a = a
         self.b = b
-        self.find_pattern = re.compile(r"\b%s\b" % a)
+        self.find_pattern = re.compile(r"\b%s\b" % a.replace(".", r"\."))
 
     def perform(self):
         try:
@@ -70,7 +70,7 @@ class SubstituteTask(object):
                 f.writelines(lines)
                 f.close()
 
-                return True
+            return True
         except Exception, e:
             print e
             return False
@@ -82,7 +82,8 @@ class SubstituteTask(object):
 
 def run_tasks(tasks):
     for task in tasks:
-        task.perform()
+        if not task.perform():
+            sys.exit(1)
 
 
 def ask(question):
@@ -97,7 +98,33 @@ def ask(question):
     else:
         return ask(question)
 def analyze(src, dest):
-    return [SubstituteTask(["Makefile"], "urename", "haha")]
+    return [MoveTask(src.path, dest.path)] + GeneralPlugin(src, dest).tasks()
+class GeneralPlugin(object):
+
+    def __init__(self, src, dest):
+        self.src = src
+        self.dest = dest
+
+    def tasks(self):
+        all_files = find(".")
+        return [SubstituteTask(all_files, self.src.path, self.dest.path)]
+
+
+def find(path):
+    all_files = []
+    for (root, dirs, files) in os.walk(path):
+        all_files += filter(include, [os.path.join(root, x) for x in files])
+    return all_files
+
+
+def include(filepath):
+    if ".git/" in filepath:
+        return False
+    if ".swp" in filepath:
+        return False
+    if os.path.basename(filepath) == "tags":
+        return False
+    return True
 print "urename is here"
 o = Options()
 run_tasks(analyze(o.src, o.dest))

@@ -31,7 +31,7 @@ class SubstituteTask(object):
         self.files = files
         self.a = a
         self.b = b
-        self.find_pattern = re.compile(r"\b%s\b" % a)
+        self.find_pattern = re.compile(r"\b%s\b" % a.replace(".", r"\."))
 
     def perform(self):
         try:
@@ -51,7 +51,7 @@ class SubstituteTask(object):
                 f.writelines(lines)
                 f.close()
 
-                return True
+            return True
         except Exception, e:
             print e
             return False
@@ -63,7 +63,8 @@ class SubstituteTask(object):
 
 def run_tasks(tasks):
     for task in tasks:
-        task.perform()
+        if not task.perform():
+            sys.exit(1)
 
 
 def ask(question):

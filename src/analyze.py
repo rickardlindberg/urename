@@ -1,2 +1,2 @@
 def analyze(src, dest):
-    return [SubstituteTask(["Makefile"], "urename", "haha")]
+    return [MoveTask(src.path, dest.path)] + GeneralPlugin(src, dest).tasks()
