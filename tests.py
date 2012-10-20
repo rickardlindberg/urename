@@ -5,15 +5,20 @@ import unittest
 
 subprocess.call(["make"])
 
-shutil.copyfile("bin/urename", "src.py")
-import src
-os.remove("src.py")
+shutil.copyfile("bin/urename", "urename_module.py")
+from urename_module import *
+os.remove("urename_module.py")
 
 
-class Tests(unittest.TestCase):
+class HaskellPluginTests(unittest.TestCase):
 
-    def test_foo(self):
-        self.fail("....")
+    def test_extract_module_name(self):
+        self.assertEquals(
+            extract_module_name_parts(""), [])
+        self.assertEquals(
+            extract_module_name_parts("module Foo where"), ["Foo"])
+        self.assertEquals(
+            extract_module_name_parts("module Foo.Bar.Baz where"), ["Foo", "Bar", "Baz"])
 
 
 if __name__ == "__main__":

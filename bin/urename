@@ -146,12 +146,15 @@ class HaskellPlugin(object):
         f = open(path)
         content = f.read()
         f.close()
-        match = re.search(r"^module *([a-zA-Z0-9.]+) *", content)
-        if match:
-            return match.group(1).split(".")
-        else:
-            return []
+        return extract_module_name_parts(content)
 
+
+def extract_module_name_parts(content):
+    match = re.search(r"^module *([a-zA-Z0-9.]+) *", content)
+    if match:
+        return match.group(1).split(".")
+    else:
+        return []
 
 register_plugin(HaskellPlugin())
 class GeneralPlugin(object):
