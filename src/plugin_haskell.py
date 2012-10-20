@@ -37,4 +37,4 @@ def extract_root(filename, parts):
         return filename
 
 
-register_plugin(HaskellPlugin())
+#register_plugin(HaskellPlugin())

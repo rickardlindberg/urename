@@ -10,6 +10,8 @@ def include(filepath):
         return False
     if ".swp" in filepath:
         return False
+    if filepath.endswith(".pyc"):
+        return False
     if os.path.basename(filepath) == "tags":
         return False
     return True

@@ -10,8 +10,8 @@ class PythonPlugin(object):
         new = os.path.basename(dest.path)[:-3]
         return [
             SubstituteTask(py_files, "import %s" % old, "import %s" % new),
-            SubstituteTask(all_files, src.path, dest.path)
+            SubstituteTask(all_files, src.path, dest.path),
         ]
 
 
-register_plugin(PythonPlugin())
+#register_plugin(PythonPlugin())

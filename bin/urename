@@ -121,11 +121,11 @@ class PythonPlugin(object):
         new = os.path.basename(dest.path)[:-3]
         return [
             SubstituteTask(py_files, "import %s" % old, "import %s" % new),
-            SubstituteTask(all_files, src.path, dest.path)
+            SubstituteTask(all_files, src.path, dest.path),
         ]
 
 
-register_plugin(PythonPlugin())
+#register_plugin(PythonPlugin())
 class HaskellPlugin(object):
 
     def use(self, src, dest):
@@ -165,7 +165,7 @@ def extract_root(filename, parts):
         return filename
 
 
-register_plugin(HaskellPlugin())
+#register_plugin(HaskellPlugin())
 class GeneralPlugin(object):
 
     def use(self, src, dest):
@@ -173,7 +173,12 @@ class GeneralPlugin(object):
 
     def tasks(self, src, dest):
         all_files = find(".")
-        return [SubstituteTask(all_files, src.path, dest.path)]
+        src_base = os.path.splitext(os.path.basename(src.path))[0]
+        dest_base = os.path.splitext(os.path.basename(dest.path))[0]
+        return [
+            SubstituteTask(all_files, src.path, dest.path),
+            SubstituteTask(all_files, src_base, dest_base),
+        ]
 
 
 register_plugin(GeneralPlugin())
