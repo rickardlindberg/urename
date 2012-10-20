@@ -1,6 +1,2 @@
-urename: *.py
-	python build.py
-
-.PHONY: clean
-clean:
-	@rm -f urename
+bin/urename: *.py
+	python build.py bin/urename
