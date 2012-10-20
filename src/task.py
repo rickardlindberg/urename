@@ -1,3 +1,5 @@
+import sys
+
 class Task(object):
 
     def can_be_done(self):
@@ -7,13 +9,14 @@ class Task(object):
         return "dummy task"
 
     def perform(self):
-        pass
+        return True
 
 
-def run_task(task):
-    if task.can_be_done() and ask(task.question()):
-        print "performing"
-        task.perform()
+def run_tasks(tasks):
+    for task in tasks:
+        if task.can_be_done() and ask(task.question()):
+            if not task.perform():
+                sys.exit(1)
 
 
 def ask(question):

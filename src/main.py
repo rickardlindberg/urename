@@ -1,3 +1,3 @@
 print "urename is here"
 Options()
-run_task(Task())
+run_tasks([Task(), Task()])
