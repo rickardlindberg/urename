@@ -1,3 +1,3 @@
 print "urename is here"
 Options()
-run_tasks([MoveTask("Makefile", "baz/Makefile"), SubstituteTask([], "a", "b")])
+run_tasks([SubstituteTask(["Makefile"], "urename", "haha")])

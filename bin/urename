@@ -18,6 +18,7 @@ class File(object):
     def __init__(self, path):
         self.path = path
 import os.path
+import re
 import subprocess
 import sys
 
@@ -49,21 +50,34 @@ class SubstituteTask(object):
         self.files = files
         self.a = a
         self.b = b
+        self.find_pattern = re.compile(r"\b%s\b" % a)
 
     def perform(self):
         try:
             for filename in self.files:
-                f = open(self.filename, "r")
+                f = open(filename, "r")
                 lines = f.readlines()
                 f.close()
+
+                def foo(line):
+                    match = self.find_pattern.search(line)
+                    if match and ask(self.question(filename, line)):
+                        return self.find_pattern.sub(self.b, line)
+                    return line
+                lines = [foo(line) for line in lines]
+
+                f = open(filename, "w")
+                f.writelines(lines)
+                f.close()
+
                 return True
         except Exception, e:
             print e
             return False
 
-    def question(self, filename, lineno):
-        return "substitute %s:%i: s/%s/%s/" % (
-            filename, lineno, self.a, self.b)
+    def question(self, filename, line):
+        return "substitute: %s -> %s\n\t%s: %s" % (
+            self.a, self.b, filename, line)
 
 
 def run_tasks(tasks):
@@ -84,4 +98,4 @@ def ask(question):
         return ask(question)
 print "urename is here"
 Options()
-run_tasks([MoveTask("Makefile", "baz/Makefile"), SubstituteTask([], "a", "b")])
+run_tasks([SubstituteTask(["Makefile"], "urename", "haha")])
