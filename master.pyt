@@ -1,7 +1,7 @@
 src/options.py
 src/types.py
 src/tasks.py
-src/analyze.py
+src/analyzer.py
 src/filesystem.py
 src/plugins.py
 src/plugin_python.py
