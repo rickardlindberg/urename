@@ -28,4 +28,13 @@ def extract_module_name_parts(content):
     else:
         return []
 
+
+def extract_root(filename, parts):
+    if parts:
+        (head, tail) = os.path.split(filename)
+        return extract_root(head, parts[:-1])
+    else:
+        return filename
+
+
 register_plugin(HaskellPlugin())
