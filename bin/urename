@@ -15,6 +15,7 @@ class Options(object):
         else:
             parser.error("requires src and dest")
 class File(object):
+
     def __init__(self, path):
         self.path = path
 import os.path
@@ -85,34 +86,6 @@ def analyze(src, dest):
         return tasks + PythonPlugin(src, dest).tasks()
     else:
         return tasks + GeneralPlugin(src, dest).tasks()
-class GeneralPlugin(object):
-
-    def __init__(self, src, dest):
-        self.src = src
-        self.dest = dest
-
-    def tasks(self):
-        all_files = find(".")
-        return [SubstituteTask(all_files, self.src.path, self.dest.path)]
-
-
-class PythonPlugin(object):
-
-    def __init__(self, src, dest):
-        self.src = src
-        self.dest = dest
-
-    def tasks(self):
-        all_files = find(".")
-        py_files = [x for x in all_files if x.endswith(".py")]
-        old = ""
-        new = ""
-        return [
-            SubstituteTask(py_files, "import %s" % old, "import %s" % new),
-            SubstituteTask(all_files, self.src.path, self.dest.path)
-        ]
-
-
 def find(path):
     all_files = []
     for (root, dirs, files) in os.walk(path):
@@ -128,6 +101,30 @@ def include(filepath):
     if os.path.basename(filepath) == "tags":
         return False
     return True
+class GeneralPlugin(object):
+
+    def __init__(self, src, dest):
+        self.src = src
+        self.dest = dest
+
+    def tasks(self):
+        all_files = find(".")
+        return [SubstituteTask(all_files, self.src.path, self.dest.path)]
+class PythonPlugin(object):
+
+    def __init__(self, src, dest):
+        self.src = src
+        self.dest = dest
+
+    def tasks(self):
+        all_files = find(".")
+        py_files = [x for x in all_files if x.endswith(".py")]
+        old = ""
+        new = ""
+        return [
+            SubstituteTask(py_files, "import %s" % old, "import %s" % new),
+            SubstituteTask(all_files, self.src.path, self.dest.path)
+        ]
 def run_tasks(tasks):
     for task in tasks:
         if not task.perform():
