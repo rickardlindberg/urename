@@ -1,6 +1,3 @@
 def analyze(src, dest):
-    tasks = [MoveTask(src.path, dest.path)]
-    if src.path.endswith(".py"):
-        return tasks + PythonPlugin(src, dest).tasks()
-    else:
-        return tasks + GeneralPlugin(src, dest).tasks()
+    plugin_tasks = get_plugin(src, dest).tasks(src, dest)
+    return [MoveTask(src.path, dest.path)] + plugin_tasks

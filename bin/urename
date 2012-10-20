@@ -81,11 +81,8 @@ class SubstituteTask(object):
         return "substitute: %s -> %s\n\t%s: %s" % (
             self.a, self.b, filename, line)
 def analyze(src, dest):
-    tasks = [MoveTask(src.path, dest.path)]
-    if src.path.endswith(".py"):
-        return tasks + PythonPlugin(src, dest).tasks()
-    else:
-        return tasks + GeneralPlugin(src, dest).tasks()
+    plugin_tasks = get_plugin(src, dest).tasks(src, dest)
+    return [MoveTask(src.path, dest.path)] + plugin_tasks
 def find(path):
     all_files = []
     for (root, dirs, files) in os.walk(path):
@@ -101,30 +98,45 @@ def include(filepath):
     if os.path.basename(filepath) == "tags":
         return False
     return True
-class GeneralPlugin(object):
+plugins = []
 
-    def __init__(self, src, dest):
-        self.src = src
-        self.dest = dest
 
-    def tasks(self):
-        all_files = find(".")
-        return [SubstituteTask(all_files, self.src.path, self.dest.path)]
+def register_plugin(self, plugin):
+    plugins.append(plugin)
+
+
+def get_plugin(self, src, dest):
+    for plugin in plugins:
+        if plugin.use(src, dest):
+            return plugin
 class PythonPlugin(object):
 
-    def __init__(self, src, dest):
-        self.src = src
-        self.dest = dest
+    def use(self, src, dest):
+        return src.path.endswith(".py")
 
-    def tasks(self):
+    def tasks(self, src, dest):
         all_files = find(".")
         py_files = [x for x in all_files if x.endswith(".py")]
         old = ""
         new = ""
         return [
             SubstituteTask(py_files, "import %s" % old, "import %s" % new),
-            SubstituteTask(all_files, self.src.path, self.dest.path)
+            SubstituteTask(all_files, src.path, dest.path)
         ]
+
+
+register_plugin(PythonPlugin())
+class GeneralPlugin(object):
+
+    def use(self, src, dest):
+        return True
+
+    def tasks(self, src, dest):
+        all_files = find(".")
+        return [SubstituteTask(all_files, src.path, dest.path)]
+
+
+register_plugin(GeneralPlugin())
 def run_tasks(tasks):
     for task in tasks:
         if not task.perform():

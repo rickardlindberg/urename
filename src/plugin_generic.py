@@ -1,9 +1,11 @@
 class GeneralPlugin(object):
 
-    def __init__(self, src, dest):
-        self.src = src
-        self.dest = dest
+    def use(self, src, dest):
+        return True
 
-    def tasks(self):
+    def tasks(self, src, dest):
         all_files = find(".")
-        return [SubstituteTask(all_files, self.src.path, self.dest.path)]
+        return [SubstituteTask(all_files, src.path, dest.path)]
+
+
+register_plugin(GeneralPlugin())

@@ -3,6 +3,7 @@ src/types.py
 src/tasks.py
 src/analyze.py
 src/filesystem.py
-src/plugin_generic.py
+src/plugins.py
 src/plugin_python.py
+src/plugin_generic.py
 src/main.py
