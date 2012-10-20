@@ -60,22 +60,3 @@ class SubstituteTask(object):
     def question(self, filename, line):
         return "substitute: %s -> %s\n\t%s: %s" % (
             self.a, self.b, filename, line)
-
-
-def run_tasks(tasks):
-    for task in tasks:
-        if not task.perform():
-            sys.exit(1)
-
-
-def ask(question):
-    print question, "[Y/n]",
-    answer = raw_input()
-    if answer == "":
-        return True
-    elif answer.lower() == "y":
-        return True
-    elif answer.lower() == "n":
-        return False
-    else:
-        return ask(question)

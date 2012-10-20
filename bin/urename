@@ -79,25 +79,6 @@ class SubstituteTask(object):
     def question(self, filename, line):
         return "substitute: %s -> %s\n\t%s: %s" % (
             self.a, self.b, filename, line)
-
-
-def run_tasks(tasks):
-    for task in tasks:
-        if not task.perform():
-            sys.exit(1)
-
-
-def ask(question):
-    print question, "[Y/n]",
-    answer = raw_input()
-    if answer == "":
-        return True
-    elif answer.lower() == "y":
-        return True
-    elif answer.lower() == "n":
-        return False
-    else:
-        return ask(question)
 def analyze(src, dest):
     tasks = [MoveTask(src.path, dest.path)]
     if src.path.endswith(".py"):
@@ -147,6 +128,25 @@ def include(filepath):
     if os.path.basename(filepath) == "tags":
         return False
     return True
-print "urename is here"
-o = Options()
-run_tasks(analyze(o.src, o.dest))
+def run_tasks(tasks):
+    for task in tasks:
+        if not task.perform():
+            sys.exit(1)
+
+
+def ask(question):
+    print question, "[Y/n]",
+    answer = raw_input()
+    if answer == "":
+        return True
+    elif answer.lower() == "y":
+        return True
+    elif answer.lower() == "n":
+        return False
+    else:
+        return ask(question)
+
+
+if __name__ == "__main__":
+    o = Options()
+    run_tasks(analyze(o.src, o.dest))
