@@ -5,5 +5,6 @@ src/analyzer.py
 src/filesystem.py
 src/plugins.py
 src/plugin_python.py
+src/plugin_haskell.py
 src/plugin_generic.py
 src/main.py
