@@ -26,23 +26,36 @@ import sys
 
 class MoveTask(object):
 
-    def __init__(self, src, dest):
-        self.src = src
-        self.dest = dest
+    def __init__(self, src_path, dest_path):
+        self.src_path = src_path
+        self.dest_path = dest_path
 
     def perform(self):
-        if self.can_be_done() and ask(self.question()):
-            if os.path.dirname(self.src) != os.path.dirname(self.dest) and subprocess.call(["mkdir", "-p", os.path.dirname(self.dest)]) != 0:
+        if self._can_be_done() and ask(self._question()):
+            if not self._create_dest_dir():
                 return False
-            if subprocess.call(["mv", self.src, self.dest]) != 0:
+            if not self._move_file():
                 return False
         return True
 
-    def can_be_done(self):
-        return os.path.exists(self.src)
+    def _can_be_done(self):
+        return os.path.exists(self.src_path)
 
-    def question(self):
-        return "mv %s %s" % (self.src, self.dest)
+    def _question(self):
+        return "mv %s %s" % (self.src_path, self.dest_path)
+
+    def _create_dest_dir(self):
+        src_dir = os.path.dirname(self.src_path)
+        dest_dir = os.path.dirname(self.dest_path)
+        if src_dir == dest_dir:
+            return True
+        else:
+            create_cmd = ["mkdir", "-p", dest_dir]
+            return subprocess.call(create_cmd) != 0
+
+    def _move_file(self):
+        move_cmd = ["mv", self.src_path, self.dest_path]
+        return subprocess.call(move_cmd) == 0
 
 
 class SubstituteTask(object):
@@ -57,29 +70,40 @@ class SubstituteTask(object):
         try:
             for filename in self.files:
                 if os.path.exists(filename):
-                    f = open(filename, "r")
-                    lines = f.readlines()
-                    f.close()
-
-                    def foo(line):
-                        match = self.find_pattern.search(line)
-                        if match and ask(self.question(filename, line)):
-                            return self.find_pattern.sub(self.b, line)
-                        return line
-                    lines = [foo(line) for line in lines]
-
-                    f = open(filename, "w")
-                    f.writelines(lines)
-                    f.close()
-
+                    self._sub_file(filename)
             return True
         except Exception, e:
             print e
             return False
 
-    def question(self, filename, line):
+    def _sub_file(self, filename):
+        lines = read_lines(filename)
+        new_lines = [self._sub_line(filename, line) for line in lines]
+        write_lines(filename, new_lines)
+
+    def _sub_line(self, filename, line):
+        match = self.find_pattern.search(line)
+        if match and ask(self._question(filename, line)):
+            return self.find_pattern.sub(self.b, line)
+        else:
+            return line
+
+    def _question(self, filename, line):
         return "substitute: %s -> %s\n\t%s: %s" % (
             self.a, self.b, filename, line)
+
+
+def read_lines(filename):
+    f = open(filename, "r")
+    lines = f.readlines()
+    f.close()
+    return lines
+
+
+def write_lines(filename, lines):
+    f = open(filename, "w")
+    f.writelines(lines)
+    f.close()
 def analyze(src, dest):
     plugin_tasks = get_plugin(src, dest).tasks(src, dest)
     return [MoveTask(src.path, dest.path)] + plugin_tasks
