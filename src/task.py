@@ -12,7 +12,7 @@ class MoveTask(object):
 
     def perform(self):
         if self.can_be_done() and ask(self.question()):
-            if subprocess.call(["mkdir", "-p", os.path.dirname(self.dest)]) != 0:
+            if os.path.dirname(self.src) != os.path.dirname(self.dest) and subprocess.call(["mkdir", "-p", os.path.dirname(self.dest)]) != 0:
                 return False
             if subprocess.call(["mv", self.src, self.dest]) != 0:
                 return False
@@ -36,20 +36,21 @@ class SubstituteTask(object):
     def perform(self):
         try:
             for filename in self.files:
-                f = open(filename, "r")
-                lines = f.readlines()
-                f.close()
+                if os.path.exists(filename):
+                    f = open(filename, "r")
+                    lines = f.readlines()
+                    f.close()
 
-                def foo(line):
-                    match = self.find_pattern.search(line)
-                    if match and ask(self.question(filename, line)):
-                        return self.find_pattern.sub(self.b, line)
-                    return line
-                lines = [foo(line) for line in lines]
+                    def foo(line):
+                        match = self.find_pattern.search(line)
+                        if match and ask(self.question(filename, line)):
+                            return self.find_pattern.sub(self.b, line)
+                        return line
+                    lines = [foo(line) for line in lines]
 
-                f = open(filename, "w")
-                f.writelines(lines)
-                f.close()
+                    f = open(filename, "w")
+                    f.writelines(lines)
+                    f.close()
 
             return True
         except Exception, e:

@@ -31,7 +31,7 @@ class MoveTask(object):
 
     def perform(self):
         if self.can_be_done() and ask(self.question()):
-            if subprocess.call(["mkdir", "-p", os.path.dirname(self.dest)]) != 0:
+            if os.path.dirname(self.src) != os.path.dirname(self.dest) and subprocess.call(["mkdir", "-p", os.path.dirname(self.dest)]) != 0:
                 return False
             if subprocess.call(["mv", self.src, self.dest]) != 0:
                 return False
@@ -55,20 +55,21 @@ class SubstituteTask(object):
     def perform(self):
         try:
             for filename in self.files:
-                f = open(filename, "r")
-                lines = f.readlines()
-                f.close()
+                if os.path.exists(filename):
+                    f = open(filename, "r")
+                    lines = f.readlines()
+                    f.close()
 
-                def foo(line):
-                    match = self.find_pattern.search(line)
-                    if match and ask(self.question(filename, line)):
-                        return self.find_pattern.sub(self.b, line)
-                    return line
-                lines = [foo(line) for line in lines]
+                    def foo(line):
+                        match = self.find_pattern.search(line)
+                        if match and ask(self.question(filename, line)):
+                            return self.find_pattern.sub(self.b, line)
+                        return line
+                    lines = [foo(line) for line in lines]
 
-                f = open(filename, "w")
-                f.writelines(lines)
-                f.close()
+                    f = open(filename, "w")
+                    f.writelines(lines)
+                    f.close()
 
             return True
         except Exception, e:
@@ -98,7 +99,11 @@ def ask(question):
     else:
         return ask(question)
 def analyze(src, dest):
-    return [MoveTask(src.path, dest.path)] + GeneralPlugin(src, dest).tasks()
+    tasks = [MoveTask(src.path, dest.path)]
+    if src.path.endswith(".py"):
+        return tasks + PythonPlugin(src, dest).tasks()
+    else:
+        return tasks + GeneralPlugin(src, dest).tasks()
 class GeneralPlugin(object):
 
     def __init__(self, src, dest):
@@ -108,6 +113,23 @@ class GeneralPlugin(object):
     def tasks(self):
         all_files = find(".")
         return [SubstituteTask(all_files, self.src.path, self.dest.path)]
+
+
+class PythonPlugin(object):
+
+    def __init__(self, src, dest):
+        self.src = src
+        self.dest = dest
+
+    def tasks(self):
+        all_files = find(".")
+        py_files = [x for x in all_files if x.endswith(".py")]
+        old = ""
+        new = ""
+        return [
+            SubstituteTask(py_files, "import %s" % old, "import %s" % new),
+            SubstituteTask(all_files, self.src.path, self.dest.path)
+        ]
 
 
 def find(path):
